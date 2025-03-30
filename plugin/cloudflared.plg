@@ -1,0 +1,144 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+<!ENTITY name				"cloudflared">
+<!ENTITY author				"iiLaurens">
+<!ENTITY version			"2025.03.30">
+<!ENTITY bundleversion			"2025.03.30">
+<!ENTITY launch				"Settings/cloudflared">
+<!ENTITY pluginURL			"https://raw.githubusercontent.com/iiLaurens/cloudflared-unraid/master/plugin/cloudflared.plg">
+<!ENTITY bundleURL			"https://raw.githubusercontent.com/iiLaurens/cloudflared-unraid/master/archive/cloudflared-&bundleversion;-x86_64-1.txz">
+<!ENTITY md5bundle			"5f6a83fed91ae53de9fe7b4db3f896ce">
+]>
+
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
+
+<CHANGES>
+##&name;
+
+###2025-03-30
+- First (test) version
+
+</CHANGES>
+
+<!--
+
+This plugin installs cloudflared on unRAID systems.
+
+-->
+
+<!--
+Get bundle.
+-->
+<FILE Name="/boot/config/plugins/cloudflared/install/cloudflared-&bundleversion;-bundle.txz" Run="upgradepkg --install-new">
+<URL>&bundleURL;</URL>
+<MD5>&md5bundle;</MD5>
+</FILE>
+
+<!--
+Install script.
+-->
+<FILE Run="/bin/bash" Method="install">
+<INLINE>
+
+cloudflaredurl="https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64"
+
+if [ -f /boot/config/plugins/cloudflared/install/cloudflared ]; then
+  cp /boot/config/plugins/cloudflared/install/cloudflared /usr/sbin/cloudflaredorig.new
+  mv /usr/sbin/cloudflaredorig.new /usr/sbin/cloudflaredorig
+  chown root:root /usr/sbin/cloudflaredorig
+  chmod 755 /usr/sbin/cloudflaredorig
+  version=`cloudflaredorig --version | grep -Po "([0-9]+\.[0-9]+\.[0-9]+)"`
+fi;
+
+rm -f $(ls /boot/config/plugins/cloudflared/install/cloudflared*.txz 2>/dev/null | grep -v '&bundleversion;')
+rm -f /usr/sbin/cloudflared
+
+ping -q -c6 github.com >/dev/null
+if [ $? -eq 0 ]; then
+  current_version=`curl -s https://api.github.com/repos/cloudflare/cloudflared/releases/latest | jq -r '.tag_name'`
+  if [[ $version = $current_version ]]; then
+    echo "Local cloudflared binary up-to-date"
+  else
+    echo "Downloading and installing cloudflared"
+    curl --connect-timeout 15 --retry 3 --retry-delay 2 --retry-max-time 30 -o /boot/config/plugins/cloudflared/install/cloudflared --create-dirs $cloudflaredurl
+    cp /boot/config/plugins/cloudflared/install/cloudflared /usr/sbin/cloudflaredorig.new
+    mv /usr/sbin/cloudflaredorig.new /usr/sbin/cloudflaredorig
+    chown root:root /usr/sbin/cloudflaredorig
+    chmod 755 /usr/sbin/cloudflaredorig
+  fi;
+else
+  echo "Connection error - Could not reach github servers - Will try fallback to existing binary"
+  if [ ! -f /usr/sbin/cloudflaredorig ]; then
+    echo "Install failed - No binary found"
+    removepkg cloudflared-&bundleversion;-bundle >/dev/null
+    rm -f /var/lib/pkgtools/packages/cloudflared-*-bundle
+    rm -rf /usr/local/emhttp/plugins/cloudflared
+    exit 1
+  fi;
+fi;
+
+if [ ! -f /usr/sbin/cloudflaredorig ]; then
+  echo "Install failed - No binary found"
+  removepkg cloudflared-&bundleversion;-bundle >/dev/null
+  rm -f /var/lib/pkgtools/packages/cloudflared-*-bundle
+  rm -rf /usr/local/emhttp/plugins/cloudflared
+  exit 1
+fi;	
+	
+if [ ! -f /boot/config/plugins/cloudflared/.cloudflared.conf ]; then
+  touch /boot/config/plugins/cloudflared/.cloudflared.conf;
+fi;
+
+echo ""
+echo "-----------------------------------------------------------"
+echo " cloudflared has been installed. "
+echo "-----------------------------------------------------------"
+echo ""
+
+</INLINE>
+</FILE>
+
+<!--
+Create wrapper
+-->
+<FILE Name="/usr/sbin/cloudflared" Mode="0755">
+<INLINE>
+#!/bin/bash
+cp -f /boot/config/plugins/cloudflared/.cloudflared.conf /usr/local/etc/cloudflared/config.yml
+	cloudflaredorig "$@";
+</INLINE>
+</FILE>
+	
+<!--
+Create gitignore
+-->
+<FILE Name="/boot/config/plugins/cloudflared/.gitignore" Mode="0600">
+<INLINE>
+.cloudflared.conf
+</INLINE>
+</FILE>
+
+<!--
+Uninstall script
+-->
+<FILE Run="/bin/bash" Method="remove">
+<INLINE>
+kill -SIGINT $(pgrep -f "cloudflaredorig.*--rc-web-gui")
+rm -rf /boot/config/plugins/cloudflared/install
+rm -f /usr/sbin/cloudflaredorig
+rm -f /usr/sbin/cloudflared
+removepkg cloudflared-&bundleversion;-bundle >/dev/null
+rm -f /var/lib/pkgtools/packages/cloudflared-*-bundle
+rm -rf /usr/local/emhttp/plugins/cloudflared
+
+echo ""
+echo "-----------------------------------------------------------"
+echo " cloudflared has been uninstalled."
+echo "-----------------------------------------------------------"
+echo ""
+
+</INLINE>
+</FILE>
+
+</PLUGIN>

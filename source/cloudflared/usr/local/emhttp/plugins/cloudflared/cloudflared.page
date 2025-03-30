@@ -1,0 +1,92 @@
+Menu="Utilities"
+Title="cloudflared"
+Icon="cloudflared.png"
+---
+<?PHP
+/* Copyright 2005-2016, Lime Technology
+ * Copyright 2012-2016, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+> Use this page to make changes to your `rclone.conf` file as well as update rclone if a newer version is available.
+>
+> To setup rclone for the first time execute the command `rclone config` in command line.
+
+<?
+$file = "/boot/config/plugins/cloudflared/.cloudflared.conf";
+$defaultfile = "/boot/config/plugins/cloudflared/.cloudflared.conf";
+$text = file_get_contents($file);
+$default_text = @file_get_contents($defaultfile);
+?>
+
+<?
+exec('cloudflared --version | grep -Po "([0-9]+\.[0-9]+\.[0-9]+)"', $output);
+$currentversion = $output[0];
+?>
+
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+.row {
+  display: flex;
+}
+
+/* Create two unequal columns */
+.column {
+  padding: 10px;
+}
+
+.left {
+  flex: 1; /* Represents 25% of the container */
+}
+
+.right {
+  flex: 3; /* Represents 75% of the container */
+}
+</style>
+</head>
+<body>
+
+<div class="row">
+  <div class="column left">
+	<?
+	echo "Installed version: $currentversion";
+	?>
+	<br>
+
+  </div>
+  <div class="column right">
+    <h2>Edit config</h2>
+	<form markdown="1" method="POST" action="/update.php" target="progressFrame">
+	<input type="hidden" name="#include" value="/webGui/include/update.file.php">
+	<input type="hidden" name="#file" value="<?=$file;?>">
+	<textarea spellcheck="false" cols="80" rows="22" name="text" style="font-family:bitstream;width:100%"><?=$text;?></textarea>
+	<br>
+	<input type="submit" value="Apply"/><input type="button" value="Original" onclick="setDefault(this.form)">
+	</form>
+  </div>
+</div>
+
+</body>
+</html>
+
+<script>
+function setDefault(form) {
+  form.elements['text'].value = <?=json_encode($default_text);?>;
+}
+</script>
+
+> Click the **Apply** button to commit the current edits.
+>
+> Click the **Original** button to initialize the edit box with the
+> original contents.  You still need to click **Apply** in order to
+>commit the change.
+</form>
