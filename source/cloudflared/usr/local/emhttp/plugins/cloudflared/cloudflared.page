@@ -2,27 +2,21 @@ Menu="Utilities"
 Title="cloudflared"
 Icon="cloudflared.png"
 ---
-<?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2012-2016, Bergware International.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License version 2,
- * as published by the Free Software Foundation.
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- */
-?>
-> Use this page to make changes to your `rclone.conf` file as well as update rclone if a newer version is available.
->
-> To setup rclone for the first time execute the command `rclone config` in command line.
-
 <?
-$file = "/boot/config/plugins/cloudflared/.cloudflared.conf";
-$defaultfile = "/boot/config/plugins/cloudflared/.cloudflared.conf";
-$text = file_get_contents($file);
-$default_text = @file_get_contents($defaultfile);
+$conf_file = "/boot/config/plugins/cloudflared/config.yml";
+$default_conf_file = "/boot/config/plugins/cloudflared/config.yml";
+$conf_text = file_get_contents($conf_file);
+$default_conf_text = @file_get_contents($default_conf_file);
+
+$creds_file = "/boot/config/plugins/cloudflared/creds.json";
+$default_creds_file = "/boot/config/plugins/cloudflared/creds.json";
+$creds_text = file_get_contents($creds_file);
+$default_creds_text = @file_get_contents($default_creds_file);
+
+$cert_file = "/boot/config/plugins/cloudflared/cert.pem";
+$default_cert_file = "/boot/config/plugins/cloudflared/cert.pem";
+$cert_text = file_get_contents($cert_file);
+$default_cert_text = @file_get_contents($default_cert_file);
 ?>
 
 <?
@@ -57,21 +51,38 @@ $currentversion = $output[0];
 
 <div class="row">
   <div class="column left">
-	<?
-	echo "Installed version: $currentversion";
-	?>
-	<br>
-
+ <?
+ echo "Installed version: $currentversion";
+ ?>
+ <br>
   </div>
   <div class="column right">
-    <h2>Edit config</h2>
-	<form markdown="1" method="POST" action="/update.php" target="progressFrame">
-	<input type="hidden" name="#include" value="/webGui/include/update.file.php">
-	<input type="hidden" name="#file" value="<?=$file;?>">
-	<textarea spellcheck="false" cols="80" rows="22" name="text" style="font-family:bitstream;width:100%"><?=$text;?></textarea>
-	<br>
-	<input type="submit" value="Apply"/><input type="button" value="Original" onclick="setDefault(this.form)">
-	</form>
+    <h2>Edit config.yml</h2>
+    <form markdown="1" id="package_form" name="package_settings" method="POST" action="/update.php" target="progressFrame">
+    <input type="hidden" name="#include" value="/webGui/include/update.file.php">
+    <input type="hidden" name="#file" value="<?=$conf_file;?>">
+    <textarea spellcheck="false" cols="80" rows="22" name="text" style="font-family:bitstream;width:100%"><?=$conf_text;?></textarea>
+    <br>
+    <input type="submit" value="Apply"/><input type="button" value="Original" onclick="setConfigDefault(this.form)">
+    </form>
+    <br>
+    <h2>Edit creds.json</h2>
+    <form markdown="1" id="package_form" name="package_settings" method="POST" action="/update.php" target="progressFrame">
+    <input type="hidden" name="#include" value="/webGui/include/update.file.php">
+    <input type="hidden" name="#file" value="<?=$creds_file;?>">
+    <textarea spellcheck="false" cols="80" rows="22" name="text" style="font-family:bitstream;width:100%"><?=$creds_text;?></textarea>
+    <br>
+    <input type="submit" value="Apply"/><input type="button" value="Original" onclick="setCredsDefault(this.form)">
+    </form>
+    <br>
+    <h2>Edit cert.pem</h2>
+    <form markdown="1" id="package_form" name="package_settings" method="POST" action="/update.php" target="progressFrame">
+    <input type="hidden" name="#include" value="/webGui/include/update.file.php">
+    <input type="hidden" name="#file" value="<?=$cert_file;?>">
+    <textarea spellcheck="false" cols="80" rows="22" name="text" style="font-family:bitstream;width:100%"><?=$cert_text;?></textarea>
+    <br>
+    <input type="submit" value="Apply"/><input type="button" value="Original" onclick="setCertDefault(this.form)">
+    </form>
   </div>
 </div>
 
@@ -79,14 +90,15 @@ $currentversion = $output[0];
 </html>
 
 <script>
-function setDefault(form) {
-  form.elements['text'].value = <?=json_encode($default_text);?>;
+function setConfigDefault(form) {
+  form.elements['text'].value = <?=json_encode($default_conf_text);?>;
+}
+
+function setCredsDefault(form) {
+  form.elements['text'].value = <?=json_encode($default_creds_text);?>;
+}
+
+function setCertDefault(form) {
+  form.elements['text'].value = <?=json_encode($default_cert_text);?>;
 }
 </script>
-
-> Click the **Apply** button to commit the current edits.
->
-> Click the **Original** button to initialize the edit box with the
-> original contents.  You still need to click **Apply** in order to
->commit the change.
-</form>

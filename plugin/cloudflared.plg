@@ -3,12 +3,12 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name				"cloudflared">
 <!ENTITY author				"iiLaurens">
-<!ENTITY version			"2025.03.30">
-<!ENTITY bundleversion			"2025.03.30">
+<!ENTITY version			"2025.09.21">
+<!ENTITY bundleversion			"2025.09.21">
 <!ENTITY launch				"Settings/cloudflared">
 <!ENTITY pluginURL			"https://raw.githubusercontent.com/iiLaurens/cloudflared-unraid/master/plugin/cloudflared.plg">
 <!ENTITY bundleURL			"https://raw.githubusercontent.com/iiLaurens/cloudflared-unraid/master/archive/cloudflared-&bundleversion;-x86_64-1.txz">
-<!ENTITY md5bundle			"5f6a83fed91ae53de9fe7b4db3f896ce">
+<!ENTITY md5bundle			"fe430ab1f881262172e2540224d3c87">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,7 +16,10 @@
 <CHANGES>
 ##&name;
 
-###2025-03-30
+### 2025-09-21
+- Add rc.d script to start cloudflared at boot
+
+### 2025-03-31
 - First (test) version
 
 </CHANGES>
@@ -44,15 +47,14 @@ Install script.
 cloudflaredurl="https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64"
 
 if [ -f /boot/config/plugins/cloudflared/install/cloudflared ]; then
-  cp /boot/config/plugins/cloudflared/install/cloudflared /usr/sbin/cloudflaredorig.new
-  mv /usr/sbin/cloudflaredorig.new /usr/sbin/cloudflaredorig
-  chown root:root /usr/sbin/cloudflaredorig
-  chmod 755 /usr/sbin/cloudflaredorig
-  version=`cloudflaredorig --version | grep -Po "([0-9]+\.[0-9]+\.[0-9]+)"`
+  cp /boot/config/plugins/cloudflared/install/cloudflared /usr/bin/cloudflared.new
+  mv /usr/bin/cloudflared.new /usr/bin/cloudflared
+  chown root:root /usr/bin/cloudflared
+  chmod 755 /usr/bin/cloudflared
+  version=`cloudflared --version | grep -Po "([0-9]+\.[0-9]+\.[0-9]+)"`
 fi;
 
 rm -f $(ls /boot/config/plugins/cloudflared/install/cloudflared*.txz 2>/dev/null | grep -v '&bundleversion;')
-rm -f /usr/sbin/cloudflared
 
 ping -q -c6 github.com >/dev/null
 if [ $? -eq 0 ]; then
@@ -61,15 +63,15 @@ if [ $? -eq 0 ]; then
     echo "Local cloudflared binary up-to-date"
   else
     echo "Downloading and installing cloudflared"
-    curl --connect-timeout 15 --retry 3 --retry-delay 2 --retry-max-time 30 -o /boot/config/plugins/cloudflared/install/cloudflared --create-dirs $cloudflaredurl
-    cp /boot/config/plugins/cloudflared/install/cloudflared /usr/sbin/cloudflaredorig.new
-    mv /usr/sbin/cloudflaredorig.new /usr/sbin/cloudflaredorig
-    chown root:root /usr/sbin/cloudflaredorig
-    chmod 755 /usr/sbin/cloudflaredorig
+    curl -L --connect-timeout 15 --retry 3 --retry-delay 2 --retry-max-time 30 -o /boot/config/plugins/cloudflared/install/cloudflared --create-dirs $cloudflaredurl
+    cp /boot/config/plugins/cloudflared/install/cloudflared /usr/bin/cloudflared.new
+    mv /usr/bin/cloudflared.new /usr/bin/cloudflared
+    chown root:root /usr/bin/cloudflared
+    chmod 755 /usr/bin/cloudflared
   fi;
 else
   echo "Connection error - Could not reach github servers - Will try fallback to existing binary"
-  if [ ! -f /usr/sbin/cloudflaredorig ]; then
+  if [ ! -f /usr/bin/cloudflared ]; then
     echo "Install failed - No binary found"
     removepkg cloudflared-&bundleversion;-bundle >/dev/null
     rm -f /var/lib/pkgtools/packages/cloudflared-*-bundle
@@ -78,17 +80,28 @@ else
   fi;
 fi;
 
-if [ ! -f /usr/sbin/cloudflaredorig ]; then
+if [ ! -f /usr/bin/cloudflared ]; then
   echo "Install failed - No binary found"
   removepkg cloudflared-&bundleversion;-bundle >/dev/null
   rm -f /var/lib/pkgtools/packages/cloudflared-*-bundle
   rm -rf /usr/local/emhttp/plugins/cloudflared
   exit 1
 fi;	
-	
-if [ ! -f /boot/config/plugins/cloudflared/.cloudflared.conf ]; then
-  touch /boot/config/plugins/cloudflared/.cloudflared.conf;
+
+if [ ! -f /boot/config/plugins/cloudflared/config.yml ]; then
+  touch /boot/config/plugins/cloudflared/config.yml;
 fi;
+
+#  touch /boot/config/plugins/cloudflared/creds.json;
+if [ ! -f /boot/config/plugins/cloudflared/creds.json ]; then
+  touch /boot/config/plugins/cloudflared/creds.json;
+fi;
+
+if [ ! -f /boot/config/plugins/cloudflared/cert.pem ]; then
+  touch /boot/config/plugins/cloudflared/cert.pem;
+fi;
+
+/etc/rc.d/rc.cloudflared start
 
 echo ""
 echo "-----------------------------------------------------------"
@@ -100,34 +113,13 @@ echo ""
 </FILE>
 
 <!--
-Create wrapper
--->
-<FILE Name="/usr/sbin/cloudflared" Mode="0755">
-<INLINE>
-#!/bin/bash
-cp -f /boot/config/plugins/cloudflared/.cloudflared.conf /usr/local/etc/cloudflared/config.yml
-	cloudflaredorig "$@";
-</INLINE>
-</FILE>
-	
-<!--
-Create gitignore
--->
-<FILE Name="/boot/config/plugins/cloudflared/.gitignore" Mode="0600">
-<INLINE>
-.cloudflared.conf
-</INLINE>
-</FILE>
-
-<!--
 Uninstall script
 -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
-kill -SIGINT $(pgrep -f "cloudflaredorig.*--rc-web-gui")
 rm -rf /boot/config/plugins/cloudflared/install
-rm -f /usr/sbin/cloudflaredorig
-rm -f /usr/sbin/cloudflared
+rm -f /usr/bin/cloudflared
+rm -f /usr/bin/cloudflared
 removepkg cloudflared-&bundleversion;-bundle >/dev/null
 rm -f /var/lib/pkgtools/packages/cloudflared-*-bundle
 rm -rf /usr/local/emhttp/plugins/cloudflared

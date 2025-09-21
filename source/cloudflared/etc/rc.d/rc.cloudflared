@@ -1,0 +1,37 @@
+#!/bin/sh
+# /etc/rc.d/rc.cloudflared - start/stop the cloudflared daemon
+
+start_cloudflared() {
+  if ! /usr/bin/pgrep --ns $$ --euid root -f "^/usr/bin/cloudflared" 1> /dev/null 2> /dev/null ; then
+    CERT_FILE="/usr/local/etc/cloudflared/cert.pem"
+    CONFIG_FILE="/usr/local/etc/cloudflared/config.yml"
+    CREDS_FILE="/boot/config/plugins/cloudflared/creds.json"
+    cp -f /boot/config/plugins/cloudflared/cert.pem $CERT_FILE
+    cp -f /boot/config/plugins/cloudflared/config.yml $CONFIG_FILE
+    /usr/sbin/cloudflared tunnel --config $CONFIG_FILE --origincert $CERT_FILE run --cred-file $CREDS_FILE >> /var/log/cloudflared.log 2>&1 &
+  fi
+}
+
+stop_cloudflared() {
+  killall --ns $$ --wait cloudflared 2> /dev/null
+}
+
+restart_cloudflared() {
+  stop_cloudflared
+  sleep 1
+  start_cloudflared
+}
+
+case "$1" in
+'start')
+  start_cloudflared
+  ;;
+'stop')
+  stop_cloudflared
+  ;;
+'restart')
+  restart_cloudflared
+  ;;
+*)
+  echo "usage $0 start|stop|restart"
+esac
