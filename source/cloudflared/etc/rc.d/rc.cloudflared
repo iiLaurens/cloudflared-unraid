@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # /etc/rc.d/rc.cloudflared - start/stop the cloudflared daemon
 
 start_cloudflared() {
@@ -8,7 +8,7 @@ start_cloudflared() {
     CREDS_FILE="/boot/config/plugins/cloudflared/creds.json"
     cp -f /boot/config/plugins/cloudflared/cert.pem $CERT_FILE
     cp -f /boot/config/plugins/cloudflared/config.yml $CONFIG_FILE
-    /usr/sbin/cloudflared tunnel --config $CONFIG_FILE --origincert $CERT_FILE run --cred-file $CREDS_FILE >> /var/log/cloudflared.log 2>&1 &
+    /usr/bin/cloudflared tunnel --config $CONFIG_FILE --origincert $CERT_FILE run --cred-file $CREDS_FILE >> /var/log/cloudflared.log 2>&1 &
   fi
 }
 
