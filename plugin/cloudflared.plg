@@ -1,14 +1,16 @@
 <?xml version='1.0' standalone='yes'?>
 
 <!DOCTYPE PLUGIN [
-<!ENTITY name				"cloudflared">
-<!ENTITY author				"iiLaurens">
-<!ENTITY version			"2025.09.21">
-<!ENTITY bundleversion			"2025.09.21">
-<!ENTITY launch				"Settings/cloudflared">
-<!ENTITY pluginURL			"https://raw.githubusercontent.com/iiLaurens/cloudflared-unraid/master/plugin/cloudflared.plg">
-<!ENTITY bundleURL			"https://raw.githubusercontent.com/iiLaurens/cloudflared-unraid/master/archive/cloudflared-&bundleversion;-x86_64-1.txz">
-<!ENTITY md5bundle			"fe430ab1f881262172e2540224d3c87">
+<!ENTITY name            "cloudflared">
+<!ENTITY author          "iiLaurens">
+<!ENTITY version         "2025.09.21">
+<!ENTITY bundleversion   "2025.09.21">
+<!ENTITY launch          "Settings/cloudflared">
+<!ENTITY github          "iiLaurens/cloudflared-unraid">
+<!ENTITY plugdir         "/usr/local/emhttp/plugins/&name;">
+<!ENTITY pluginURL       "https://raw.githubusercontent.com/&github;/master/plugin/&name;.plg">
+<!ENTITY bundleURL       "https://raw.githubusercontent.com/&github;/master/archive/&name;-&version;-x86_64-1.txz">
+<!ENTITY md5bundle       "8933e445f92ce8fd706c067edd7acf29">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
