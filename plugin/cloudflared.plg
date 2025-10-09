@@ -3,14 +3,14 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name            "cloudflared">
 <!ENTITY author          "iiLaurens">
-<!ENTITY version         "2025.09.21">
-<!ENTITY bundleversion   "2025.09.21">
+<!ENTITY version         "2025.10.09">
+<!ENTITY bundleversion   "2025.10.09">
 <!ENTITY launch          "Settings/cloudflared">
 <!ENTITY github          "iiLaurens/cloudflared-unraid">
 <!ENTITY plugdir         "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL       "https://raw.githubusercontent.com/&github;/master/plugin/&name;.plg">
 <!ENTITY bundleURL       "https://raw.githubusercontent.com/&github;/master/archive/&name;-&version;-x86_64-1.txz">
-<!ENTITY md5bundle       "0181caefe20baa588c3d0b3e22dc931d">
+<!ENTITY md5bundle       "20603bf04ca3c52ad1dc34e7b1a4e235">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -103,6 +103,8 @@ if [ ! -f /boot/config/plugins/cloudflared/cert.pem ]; then
   touch /boot/config/plugins/cloudflared/cert.pem;
 fi;
 
+chown root:root /etc/rc.d/rc.cloudflared
+chmod 755 /etc/rc.d/rc.cloudflared
 /etc/rc.d/rc.cloudflared start
 
 echo ""
@@ -121,10 +123,11 @@ Uninstall script
 <INLINE>
 rm -rf /boot/config/plugins/cloudflared/install
 rm -f /usr/bin/cloudflared
-rm -f /usr/bin/cloudflared
 removepkg cloudflared-&bundleversion;-bundle >/dev/null
 rm -f /var/lib/pkgtools/packages/cloudflared-*-bundle
 rm -rf /usr/local/emhttp/plugins/cloudflared
+rm -rf /etc/rc.d/rc.cloudflared
+rm -rf /var/log/cloudflared.log
 
 echo ""
 echo "-----------------------------------------------------------"
