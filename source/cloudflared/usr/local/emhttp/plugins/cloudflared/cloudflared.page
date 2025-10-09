@@ -4,19 +4,13 @@ Icon="cloudflared.png"
 ---
 <?
 $conf_file = "/boot/config/plugins/cloudflared/config.yml";
-$default_conf_file = "/boot/config/plugins/cloudflared/config.yml";
 $conf_text = file_get_contents($conf_file);
-$default_conf_text = @file_get_contents($default_conf_file);
 
 $creds_file = "/boot/config/plugins/cloudflared/creds.json";
-$default_creds_file = "/boot/config/plugins/cloudflared/creds.json";
 $creds_text = file_get_contents($creds_file);
-$default_creds_text = @file_get_contents($default_creds_file);
 
 $cert_file = "/boot/config/plugins/cloudflared/cert.pem";
-$default_cert_file = "/boot/config/plugins/cloudflared/cert.pem";
 $cert_text = file_get_contents($cert_file);
-$default_cert_text = @file_get_contents($default_cert_file);
 ?>
 
 <?
@@ -63,7 +57,7 @@ $currentversion = $output[0];
     <input type="hidden" name="#file" value="<?=$conf_file;?>">
     <textarea spellcheck="false" cols="80" rows="22" name="text" style="font-family:bitstream;width:100%"><?=$conf_text;?></textarea>
     <br>
-    <input type="submit" value="Apply"/><input type="button" value="Original" onclick="setConfigDefault(this.form)">
+    <input type="submit" value="Save changes"/><input type="button" value="Reset" onclick="setConfigDefault(this.form)">
     </form>
     <br>
     <h2>Edit creds.json</h2>
@@ -72,7 +66,7 @@ $currentversion = $output[0];
     <input type="hidden" name="#file" value="<?=$creds_file;?>">
     <textarea spellcheck="false" cols="80" rows="22" name="text" style="font-family:bitstream;width:100%"><?=$creds_text;?></textarea>
     <br>
-    <input type="submit" value="Apply"/><input type="button" value="Original" onclick="setCredsDefault(this.form)">
+    <input type="submit" value="Save changes"/><input type="button" value="Reset" onclick="setCredsDefault(this.form)">
     </form>
     <br>
     <h2>Edit cert.pem</h2>
@@ -81,7 +75,7 @@ $currentversion = $output[0];
     <input type="hidden" name="#file" value="<?=$cert_file;?>">
     <textarea spellcheck="false" cols="80" rows="22" name="text" style="font-family:bitstream;width:100%"><?=$cert_text;?></textarea>
     <br>
-    <input type="submit" value="Apply"/><input type="button" value="Original" onclick="setCertDefault(this.form)">
+    <input type="submit" value="Save changes"/><input type="button" value="Reset" onclick="setCertDefault(this.form)">
     </form>
   </div>
 </div>
@@ -91,14 +85,14 @@ $currentversion = $output[0];
 
 <script>
 function setConfigDefault(form) {
-  form.elements['text'].value = <?=json_encode($default_conf_text);?>;
+  form.elements['text'].value = <?=json_encode($conf_text);?>;
 }
 
 function setCredsDefault(form) {
-  form.elements['text'].value = <?=json_encode($default_creds_text);?>;
+  form.elements['text'].value = <?=json_encode($creds_text);?>;
 }
 
 function setCertDefault(form) {
-  form.elements['text'].value = <?=json_encode($default_cert_text);?>;
+  form.elements['text'].value = <?=json_encode($cert_text);?>;
 }
 </script>

@@ -3,11 +3,12 @@
 
 start_cloudflared() {
   if ! /usr/bin/pgrep --ns $$ --euid root -f "^/usr/bin/cloudflared" 1> /dev/null 2> /dev/null ; then
-    CERT_FILE="/usr/local/etc/cloudflared/cert.pem"
-    CONFIG_FILE="/usr/local/etc/cloudflared/config.yml"
-    CREDS_FILE="/boot/config/plugins/cloudflared/creds.json"
+    CERT_FILE="/usr/local/emhttp/plugins/cloudflared/cert.pem"
+    CONFIG_FILE="/usr/local/emhttp/plugins/cloudflared/config.yml"
+    CREDS_FILE="/usr/local/emhttp/plugins/cloudflared/creds.json"
     cp -f /boot/config/plugins/cloudflared/cert.pem $CERT_FILE
     cp -f /boot/config/plugins/cloudflared/config.yml $CONFIG_FILE
+    cp -f /boot/config/plugins/cloudflared/creds.json $CREDS_FILE
     /usr/bin/cloudflared tunnel --config $CONFIG_FILE --origincert $CERT_FILE run --cred-file $CREDS_FILE >> /var/log/cloudflared.log 2>&1 &
   fi
 }
