@@ -1,7 +1,7 @@
 <?xml version='1.0' standalone='yes'?>
 
 <!DOCTYPE PLUGIN [
-<!ENTITY name            "Cloudflared for unRAID">
+<!ENTITY name            "cloudflared">
 <!ENTITY author          "iiLaurens">
 <!ENTITY version         "2025.10.10b">
 <!ENTITY bundleversion   "2025.10.10b">
