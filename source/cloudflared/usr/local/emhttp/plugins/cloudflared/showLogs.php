@@ -1,6 +1,23 @@
 <?php
 $logFile = "/var/log/cloudflared.log";
 
+// Handle AJAX requests for log content only
+if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
+    header('Content-Type: text/plain');
+    if (file_exists($logFile)) {
+        $logContent = file_get_contents($logFile);
+        if (empty($logContent)) {
+            echo "Log file is empty.";
+        } else {
+            echo htmlspecialchars($logContent);
+        }
+    } else {
+        echo "Log file not found.";
+    }
+    exit;
+}
+
+// Regular page load
 if (file_exists($logFile)) {
     $logContent = file_get_contents($logFile);
     if (empty($logContent)) {
@@ -16,13 +33,7 @@ if (file_exists($logFile)) {
 <head>
     <title>Cloudflared Logs</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 10px;
-        }
         .log-content {
-            background-color: #222;
-            color: #eee;
             padding: 10px;
             border-radius: 4px;
             font-family: monospace;
@@ -31,32 +42,35 @@ if (file_exists($logFile)) {
             overflow-y: auto;
             border: 1px solid #555;
         }
-        .header {
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ccc;
-        }
-        .buttons {
-            margin-top: 10px;
-            text-align: center;
-        }
-        .buttons input {
-            margin: 0 5px;
-        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h3>Cloudflared Logs</h3>
-        <p>Log file: <?= $logFile ?></p>
-    </div>
+    <div class="log-content" id="logContent"><?= htmlspecialchars($logContent) ?></div>
 
-    <div class="log-content"><?= htmlspecialchars($logContent) ?></div>
+    <script>
+        function updateLogs() {
+            const logContainer = document.getElementById('logContent');
 
-    <div class="buttons">
-        <input type="button" value="Refresh" onclick="location.reload();">
-        <input type="button" value="Close" onclick="parent.closeBox();">
-    </div>
+            fetch('?ajax=1')
+                .then(response => response.text())
+                .then(data => {
+                    logContainer.textContent = data;
+                    // Scroll to bottom
+                    logContainer.scrollTop = logContainer.scrollHeight;
+                })
+                .catch(error => {
+                    console.error('Error fetching logs:', error);
+                });
+        }
+
+        // Initial scroll to bottom
+        document.addEventListener('DOMContentLoaded', function() {
+            const logContainer = document.getElementById('logContent');
+            logContainer.scrollTop = logContainer.scrollHeight;
+        });
+
+        // Update logs every second
+        setInterval(updateLogs, 1000);
+    </script>
 </body>
 </html>
-
