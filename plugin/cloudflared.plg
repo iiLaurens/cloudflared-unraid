@@ -3,14 +3,14 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name            "cloudflared">
 <!ENTITY author          "iiLaurens">
-<!ENTITY version         "2025.10.09a">
-<!ENTITY bundleversion   "2025.10.09a">
+<!ENTITY version         "2025.10.10">
+<!ENTITY bundleversion   "2025.10.10">
 <!ENTITY launch          "Settings/cloudflared">
 <!ENTITY github          "iiLaurens/cloudflared-unraid">
 <!ENTITY plugdir         "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL       "https://raw.githubusercontent.com/&github;/master/plugin/&name;.plg">
 <!ENTITY bundleURL       "https://raw.githubusercontent.com/&github;/master/archive/&name;-&version;-x86_64-1.txz">
-<!ENTITY md5bundle       "a4164cbc45c748ca91d9f6bbaaf8c3c5">
+<!ENTITY md5bundle       "8c4718de8abcd5a82880541e9abfe8df">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -18,11 +18,8 @@
 <CHANGES>
 ##&name;
 
-### 2025-09-21
-- Add rc.d script to start cloudflared at boot
-
-### 2025-03-31
-- First (test) version
+### 2025-10-10
+- First release
 
 </CHANGES>
 
