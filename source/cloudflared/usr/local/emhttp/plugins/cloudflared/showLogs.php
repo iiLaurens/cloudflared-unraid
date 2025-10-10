@@ -9,7 +9,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         if (empty($logContent)) {
             echo "Log file is empty.";
         } else {
-            echo htmlspecialchars($logContent);
+            echo $logContent;
         }
     } else {
         echo "Log file not found.";
@@ -31,21 +31,27 @@ if (file_exists($logFile)) {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Cloudflared Logs</title>
+    <title>Cloudflared live logs</title>
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: monospace;
+        }
         .log-content {
             padding: 10px;
             border-radius: 4px;
             font-family: monospace;
             white-space: pre-wrap;
-            max-height: 70vh;
+            height: 100vh;
             overflow-y: auto;
             border: 1px solid #555;
+            box-sizing: border-box;
         }
     </style>
 </head>
 <body>
-    <div class="log-content" id="logContent"><?= htmlspecialchars($logContent) ?></div>
+    <div class="log-content" id="logContent"><?= $logContent ?></div>
 
     <script>
         function updateLogs() {

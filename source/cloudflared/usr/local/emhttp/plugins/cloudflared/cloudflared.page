@@ -49,7 +49,7 @@ $currentversion = $output[0];
  echo "Cloudflared version: $currentversion";
  ?>
  <div style="margin-top: 10px;">
-  <input type="button" value="View logs" onclick="showCloudflaredLogs();">
+  <input type="button" value="View live logs" onclick="showCloudflaredLogs();">
 </div>
  <br>
   </div>
