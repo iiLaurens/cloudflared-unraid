@@ -1,7 +1,7 @@
 #!/bin/bash
 # /etc/rc.d/rc.cloudflared - start/stop the cloudflared daemon
 
-start_cloudflared() {
+start() {
   if ! /usr/bin/pgrep --ns $$ --euid root -f "^/usr/bin/cloudflared" 1> /dev/null 2> /dev/null ; then
     CERT_FILE="/usr/local/emhttp/plugins/cloudflared/cert.pem"
     CONFIG_FILE="/usr/local/emhttp/plugins/cloudflared/config.yml"
@@ -13,25 +13,25 @@ start_cloudflared() {
   fi
 }
 
-stop_cloudflared() {
+stop() {
   killall --ns $$ --wait cloudflared 2> /dev/null
 }
 
-restart_cloudflared() {
-  stop_cloudflared
+restart() {
+  stop
   sleep 1
-  start_cloudflared
+  start
 }
 
 case "$1" in
 'start')
-  start_cloudflared
+  start
   ;;
 'stop')
-  stop_cloudflared
+  stop
   ;;
 'restart')
-  restart_cloudflared
+  restart
   ;;
 *)
   echo "usage $0 start|stop|restart"
