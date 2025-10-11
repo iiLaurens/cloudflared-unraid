@@ -50,56 +50,46 @@ if (file_exists($logFile)) {
     <div class="log-content" id="logContent"><?= $logContent ?></div>
 
     <script>
-      let stickToBottom = true;
+        let stickToBottom = true;
 
-      function distanceFromBottom(el) {
-        return el.scrollHeight - el.scrollTop - el.clientHeight;
-      }
+        function distanceFromBottom(el) {
+            return el.scrollHeight - el.scrollTop - el.clientHeight;
+        }
 
-      function updateLogs() {
-        const el = document.getElementById('logContent');
+        function updateLogs() {
+            const logContainer = document.getElementById('logContent');
+            const offsetFromBottom = distanceFromBottom(logContainer);
 
-        const wasAtBottom = distanceFromBottom(el) <= 3;
-        const oldTop = el.scrollTop;
-        const oldHeight = el.scrollHeight;
+            fetch('?ajax=1', { cache: 'no-store' })
+                .then(response => response.text())
+                .then(data => {
+                    if (logContainer.textContent === data) return;
 
-        fetch('?ajax=1', { cache: 'no-store' })
-          .then(r => r.text())
-          .then(data => {
-            // No change
-            if (data === el.textContent) return;
+                    logContainer.textContent = data;
 
-            // Append only the new part if it's a pure append
-            if (data.startsWith(el.textContent)) {
-              const addition = data.slice(el.textContent.length);
-              if (addition.length) el.append(document.createTextNode(addition));
-            } else {
-              // Fallback: full replace (e.g., rotation/truncation)
-              el.textContent = data;
-            }
+                    if (stickToBottom) {
+                        logContainer.scrollTop = logContainer.scrollHeight;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching logs:', error);
+                });
+        }
 
-            // Anchor position
-            if (stickToBottom || wasAtBottom) {
-              el.scrollTop = el.scrollHeight; // stay at bottom
-            } else {
-              const newHeight = el.scrollHeight;
-              el.scrollTop = Math.max(0, oldTop + (newHeight - oldHeight));
-            }
-          })
-          .catch(err => console.error('Error fetching logs:', err));
-      }
+        document.addEventListener('DOMContentLoaded', function() {
+            const logContainer = document.getElementById('logContent');
+            // Start at bottom
+            logContainer.scrollTop = logContainer.scrollHeight;
+            stickToBottom = true;
 
-      document.addEventListener('DOMContentLoaded', () => {
-        const el = document.getElementById('logContent');
-        el.scrollTop = el.scrollHeight; // start at bottom
-        stickToBottom = true;
-
-        el.addEventListener('scroll', () => {
-          stickToBottom = distanceFromBottom(el) <= 3;
+            // Toggle auto-scroll based on whether user is at the bottom
+            logContainer.addEventListener('scroll', () => {
+                stickToBottom = distanceFromBottom(logContainer) <= 3;
+            });
         });
-      });
 
-      setInterval(updateLogs, 1000);
+        // Update logs every second
+        setInterval(updateLogs, 1000);
     </script>
 </body>
 </html>
