@@ -3,14 +3,14 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name            "cloudflared">
 <!ENTITY author          "iiLaurens">
-<!ENTITY version         "2025.10.10e">
-<!ENTITY bundleversion   "2025.10.10e">
+<!ENTITY version         "2025.10.11">
+<!ENTITY bundleversion   "2025.10.11">
 <!ENTITY launch          "Settings/cloudflared">
 <!ENTITY github          "iiLaurens/cloudflared-unraid">
 <!ENTITY plugdir         "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL       "https://raw.githubusercontent.com/&github;/master/plugin/&name;.plg">
 <!ENTITY bundleURL       "https://raw.githubusercontent.com/&github;/master/archive/&name;-&version;-x86_64-1.txz">
-<!ENTITY md5bundle       "e9448acea2bd994a68ae898a21100aef">
+<!ENTITY md5bundle       "da962037448f3d1d0652ceea35a85d69">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">

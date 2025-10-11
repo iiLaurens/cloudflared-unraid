@@ -3,7 +3,7 @@ $logFile = "/var/log/cloudflared.log";
 
 // Handle AJAX requests for log content only
 if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
-    header('Content-Type: text/plain');
+    header('Content-Type: text/plain; charset=UTF-8');
     if (file_exists($logFile)) {
         $logContent = file_get_contents($logFile);
         if (empty($logContent)) {
@@ -27,7 +27,6 @@ if (file_exists($logFile)) {
     $logContent = "Log file not found.";
 }
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -54,25 +53,46 @@ if (file_exists($logFile)) {
     <div class="log-content" id="logContent"><?= $logContent ?></div>
 
     <script>
+        let stickToBottom = true;
+
+        function distanceFromBottom(el) {
+            return el.scrollHeight - el.scrollTop - el.clientHeight;
+        }
+
         function updateLogs() {
             const logContainer = document.getElementById('logContent');
+            const offsetFromBottom = distanceFromBottom(logContainer);
 
-            fetch('?ajax=1')
+            fetch('?ajax=1', { cache: 'no-store' })
                 .then(response => response.text())
                 .then(data => {
+                    if (logContainer.textContent === data) return;
+
                     logContainer.textContent = data;
-                    // Scroll to bottom
-                    logContainer.scrollTop = logContainer.scrollHeight;
+
+                    if (stickToBottom) {
+                        logContainer.scrollTop = logContainer.scrollHeight;
+                    } else {
+                        // Preserve user's relative position from the bottom
+                        logContainer.scrollTop = logContainer.scrollHeight - logContainer.clientHeight - offsetFromBottom;
+                        if (logContainer.scrollTop < 0) logContainer.scrollTop = 0;
+                    }
                 })
                 .catch(error => {
                     console.error('Error fetching logs:', error);
                 });
         }
 
-        // Initial scroll to bottom
         document.addEventListener('DOMContentLoaded', function() {
             const logContainer = document.getElementById('logContent');
+            // Start at bottom
             logContainer.scrollTop = logContainer.scrollHeight;
+            stickToBottom = true;
+
+            // Toggle auto-scroll based on whether user is at the bottom
+            logContainer.addEventListener('scroll', () => {
+                stickToBottom = distanceFromBottom(logContainer) <= 3;
+            });
         });
 
         // Update logs every second
